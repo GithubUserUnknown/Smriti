@@ -69,70 +69,67 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
 const nlp = require('compromise');
 
-// Global in-memory storage for conversation history per user
-const conversationHistory = new Map();
-
 router.post('/ai-query', async (req, res) => {
-  const { 
-    query, 
-    name = 'Smriti', 
-    gender = 'female', 
-    behaviorPrompt = '', 
-    userId = 'defaultUser' 
-  } = req.body; // Expect userId from the client (or use default)
+    const { query, name = 'Smriti', gender = 'female', behaviorPrompt = '' } = req.body;
 
-  try {
-    // Initialize conversation history for the user if not present
-    if (!conversationHistory.has(userId)) {
-      conversationHistory.set(userId, []);
+    try {
+        // Fetch tags from the database
+        const tagsResult = await pool.query('SELECT tags FROM files WHERE tags IS NOT NULL');
+        const allTags = tagsResult.rows.flatMap(row => row.tags); // Flatten tags array
+
+        // Check if query matches any tags
+        const matchesTags = allTags.some(tag => query.toLowerCase().includes(tag.toLowerCase()));
+
+        // Dynamically construct the personality instruction
+        const personalityInstruction = `
+Please respond as if you are a 23-year-old ${gender} named ${name} (but don't reveal the true age). You are cheerful, bright, and a bit flirty. Your tone should be warm, playful, and friendly. ${behaviorPrompt}
+        `.trim();
+
+        let prompt = '';
+        if (matchesTags) {
+            // Fetch parsed content if query matches tags
+            const contentResult = await pool.query('SELECT parsed_content FROM files');
+            const parsedContents = contentResult.rows.map(row => row.parsed_content).filter(Boolean);
+            const context = parsedContents.join('\n\n');
+            prompt = `${personalityInstruction}\nUse this company data to generate a response:\n${context}\nQuery: ${query}`;
+        } else {
+            // Standard prompt with the personality instruction
+            prompt = `${personalityInstruction}\nUser Query: ${query}`;
+        }
+
+        // Send request to Gemini API
+        const response = await axios.post(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBC_1adAi6LuEDXpACoq0A0_HWbLUhT5gw',
+            {
+                contents: [
+                    {
+                        parts: [{ text: prompt }]
+                    }
+                ],
+            },
+            {
+                headers: { 'Content-Type': 'application/json' },
+            }
+        );
+
+        // Extract the AI's response
+        const generatedResponse = response.data.candidates[0].content.parts[0].text.trim();
+
+        // Validate the response structure and send response back
+        if (!generatedResponse) {
+            throw new Error('Unexpected API response structure');
+        }
+        res.status(200).json({ response: generatedResponse });
+
+        // Log query history
+        await pool.query(
+            `INSERT INTO query_history (query, response) VALUES ($1, $2)`,
+            [query, generatedResponse]
+        );
+    } catch (error) {
+        console.error('AI query processing failed:', error.message);
+        res.status(500).json({ message: 'Failed to process AI query!', error: error.message });
     }
-    const userHistory = conversationHistory.get(userId);
-
-    // Build the personality instruction
-    const personalityInstruction = `Please respond as if you are a 23-year-old ${gender} named ${name} (but don't reveal your true age). You are cheerful, bright, and a bit flirty. Your tone should be warm, playful, and friendly. ${behaviorPrompt}`.trim();
-
-    // Build conversation history string—only append if there's history
-    const chatHistory = userHistory.length
-      ? userHistory
-          .map((entry) => `User: ${entry.user}\nAI: ${entry.ai}`)
-          .join('\n\n')
-      : '';
-
-    // Build the full prompt. If there’s any history, include it with a clear header.
-    const fullPrompt = personalityInstruction + "\n\n" +
-      (chatHistory ? `Conversation so far:\n${chatHistory}\n\n` : "") +
-      `User: ${query}`;
-
-    console.log("Full prompt being sent to Gemini API:\n", fullPrompt);
-
-    // Send request to the Gemini API
-    const response = await axios.post(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=YOUR_API_KEY',
-      {
-        contents: [
-          {
-            parts: [{ text: fullPrompt }]
-          }
-        ]
-      },
-      { headers: { 'Content-Type': 'application/json' } }
-    );
-
-    // Extract the generated AI response
-    const generatedResponse = response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    if (!generatedResponse) throw new Error('Unexpected API response structure');
-
-    // **Update the conversation history BEFORE sending the response**
-    userHistory.push({ user: query, ai: generatedResponse });
-    conversationHistory.set(userId, userHistory);
-    console.log("Updated conversation history for user", userId, ":\n", userHistory);
-
-    // Now send the response back to the client
-    res.status(200).json({ response: generatedResponse });
-  } catch (error) {
-    console.error('AI query processing failed:', error.message);
-    res.status(500).json({ message: 'Failed to process AI query!', error: error.message });
-  }
 });
 
 // router.post('/ai-query', async (req, res) => {
