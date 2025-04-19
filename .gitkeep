@@ -1,0 +1,4 @@
+frontend/src/*
+frontend/public/*
+frontend/package.json
+frontend/README.md

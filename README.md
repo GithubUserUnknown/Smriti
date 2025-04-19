@@ -53,14 +53,31 @@ This will install the following required packages from package.json:
 - @huggingface/inference
 - compromise
 
-3. Create a `.env` file in the backend directory:
+### Database Configuration
+
+1. Copy the database configuration template:
+```bash
+cp backend/dbConfig.template.js backend/dbConfig.js
+```
+
+2. Create a `.env` file in the backend directory with your database credentials:
 ```env
-# Database Configuration
+DB_USER=your_username
+DB_HOST=your_host
+DB_NAME=your_database_name
+DB_PASSWORD=your_password
+DB_PORT=your_port
+
+# Database Configuration example for localhost
 DB_USER=postgres
 DB_HOST=localhost
 DB_NAME=smritidbp
 DB_PASSWORD=your_password
 DB_PORT=5432
+
+# Server Configuration
+PORT=5000
+
 
 # Server Configuration
 PORT=5000
@@ -169,12 +186,40 @@ The frontend application will open in your browser at http://localhost:3000
    - Make sure you've run `npm install` in both frontend and backend directories
    - Check if all dependencies are properly listed in package.json
 
-2. Database connection issues:
-   - Verify PostgreSQL is running
-   - Check your database credentials in .env file
-   - Ensure the database and tables are created properly
+2. Database Connection Issues:
+   - Ensure PostgreSQL is running
+   - Verify credentials in `.env`
+   - Check if `pg` module is installed
+   ```bash
+   npm install pg
+   ```
 
-3. API key issues:
+3. File Upload Issues:
+   - Ensure `multer` is installed
+   - Check if uploads directory exists
+   ```bash
+   mkdir backend/uploads
+   ```
+
+4. PDF Parsing Issues:
+   - Install pdf-parse dependencies
+   ```bash
+   npm install pdf-parse
+   ```
+
+5. CORS Issues:
+   - Verify cors middleware is properly configured
+   ```bash
+   npm install cors
+   ```
+
+6. Environment Variables:
+   - Ensure dotenv is installed
+   ```bash
+   npm install dotenv
+   ```
+
+7. API key issues:
    - Verify your Gemini API key is valid
    - Check if the API key is properly set in the .env file
 
@@ -202,4 +247,5 @@ The frontend application will open in your browser at http://localhost:3000
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
 
