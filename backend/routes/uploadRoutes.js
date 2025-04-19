@@ -70,67 +70,104 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 const nlp = require('compromise');
 
 router.post('/ai-query', async (req, res) => {
-    const { query, name = 'Smriti', gender = 'female', behaviorPrompt = '' } = req.body;
+  // Destructure fields; persistentCompanyContext is optional (from frontend if already active)
+  const {
+    query: userQuery,
+    userId, // must be included (from frontend or auth token)
+    name = 'Smriti',
+    gender = 'female',
+    age = 23,
+    behaviorPrompt = '',
+    conversationHistory: clientHistory = '', // A conversation summary string
+    persistentCompanyContext = '' // Persistent company data carried over from previous queries
+  } = req.body;
 
-    try {
-        // Fetch tags from the database
-        const tagsResult = await pool.query('SELECT tags FROM files WHERE tags IS NOT NULL');
-        const allTags = tagsResult.rows.flatMap(row => row.tags); // Flatten tags array
+  try {
+    // Fetch available tags from the database
+    const tagsResult = await pool.query('SELECT tags FROM files WHERE tags IS NOT NULL');
+    const allTags = tagsResult.rows.flatMap(row => row.tags);
 
-        // Check if query matches any tags
-        const matchesTags = allTags.some(tag => query.toLowerCase().includes(tag.toLowerCase()));
+    const conversationContext = clientHistory.trim();
 
-        // Dynamically construct the personality instruction
-        const personalityInstruction = `
-Please respond as if you are a 23-year-old ${gender} named ${name} (but don't reveal the true age). You are cheerful, bright, and a bit flirty. Your tone should be warm, playful, and friendly. ${behaviorPrompt}
-        `.trim();
+    // Check if current query matches any company tag using userQuery
+    const matchesTags = allTags.some(tag => userQuery.toLowerCase().includes(tag.toLowerCase()));
+  
+    // Build personality instruction text
+    const personalityInstruction = `
+      Please respond as if you are a ${age}-year-old ${gender} named ${name}.
+      ${behaviorPrompt || "You are cheerful, bright, and a bit flirty. Your tone should be warm, playful, and friendly."}
+    `.trim();
 
-        let prompt = '';
-        if (matchesTags) {
-            // Fetch parsed content if query matches tags
-            const contentResult = await pool.query('SELECT parsed_content FROM files');
-            const parsedContents = contentResult.rows.map(row => row.parsed_content).filter(Boolean);
-            const context = parsedContents.join('\n\n');
-            prompt = `${personalityInstruction}\nUse this company data to generate a response:\n${context}\nQuery: ${query}`;
-        } else {
-            // Standard prompt with the personality instruction
-            prompt = `${personalityInstruction}\nUser Query: ${query}`;
-        }
+    let prompt = '';
+    let companyDataUsed = false;
+    let companyContext = '';
 
-        // Send request to Gemini API
-        const response = await axios.post(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBC_1adAi6LuEDXpACoq0A0_HWbLUhT5gw',
-            {
-                contents: [
-                    {
-                        parts: [{ text: prompt }]
-                    }
-                ],
-            },
-            {
-                headers: { 'Content-Type': 'application/json' },
-            }
-        );
+    // If the query matches tags or if persistent company context is already provided,
+    // we include the company data.
+    if (matchesTags || persistentCompanyContext) {
+      if (matchesTags) {
+        // Fetch company data (parsed content) from the database
+        const contentResult = await pool.query('SELECT parsed_content FROM files');
+        const parsedContents = contentResult.rows
+          .map(row => row.parsed_content)
+          .filter(Boolean);
+        companyContext = parsedContents.join('\n\n');
+      } else {
+        // Otherwise, keep the previously persisted company data.
+        companyContext = persistentCompanyContext;
+      }
+      companyDataUsed = true;
 
-        // Extract the AI's response
-        const generatedResponse = response.data.candidates[0].content.parts[0].text.trim();
-
-        // Validate the response structure and send response back
-        if (!generatedResponse) {
-            throw new Error('Unexpected API response structure');
-        }
-        res.status(200).json({ response: generatedResponse });
-
-        // Log query history
-        await pool.query(
-            `INSERT INTO query_history (query, response) VALUES ($1, $2)`,
-            [query, generatedResponse]
-        );
-    } catch (error) {
-        console.error('AI query processing failed:', error.message);
-        res.status(500).json({ message: 'Failed to process AI query!', error: error.message });
+      if (conversationContext.length) {
+        prompt = `${personalityInstruction}\n\nConversation so far:\n${conversationContext}\n\nUse the context to generate a response:\n${companyContext}\n\nUser: ${userQuery}`;
+      } else {
+        prompt = `${personalityInstruction}\nUse this company data to generate a response:\n${companyContext}\n\nUser: ${userQuery}`;
+      }
+    } else {
+      // If no company context is involved, build the prompt normally.
+      if (conversationContext.length) {
+        prompt = `${personalityInstruction}\n\nConversation so far:\n${conversationContext}\n\nUser: ${userQuery}`;
+      } else {
+        prompt = `${personalityInstruction}\nUser: ${userQuery}`;
+      }
     }
+
+    // For debugging: log the full prompt
+    console.log("DEBUG: Sending the following prompt to Gemini API:");
+    console.log(prompt);
+
+    // Call Gemini API using the constructed prompt
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        contents: [
+          { parts: [{ text: prompt }] }
+        ]
+      },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+
+    const generatedResponse = response.data.candidates[0].content.parts[0].text.trim();
+    if (!generatedResponse) {
+      throw new Error('Unexpected API response structure');
+    }
+    res.status(200).json({
+      response: generatedResponse,
+      companyDataUsed,
+      companyContext // including it so client can persist for subsequent queries
+    });
+
+    // Log the query history with the userQuery and generatedResponse
+    await pool.query(
+      `INSERT INTO query_history (query, response) VALUES ($1, $2)`,
+      [userQuery, generatedResponse]
+    );
+  } catch (error) {
+    console.error('AI query processing failed:', error.message);
+    res.status(500).json({ message: 'Failed to process AI query!', error: error.message });
+  }
 });
+
 
 // router.post('/ai-query', async (req, res) => {
 //     const { query, language } = req.body; // User's preferred language
@@ -167,7 +204,7 @@ Please respond as if you are a 23-year-old ${gender} named ${name} (but don't re
 
 //         // Send request to Gemini API
 //         const response = await axios.post(
-//             'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBC_1adAi6LuEDXpACoq0A0_HWbLUhT5gw',
+//             'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=GEMINI_API_KEY',
 //             {
 //                 contents: [
 //                     {

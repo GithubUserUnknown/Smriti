@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const uploadRoutes = require('./routes/uploadRoutes');
+require('dotenv').config();
+const personalityRoutes = require('./routes/personalityRoutes');
 
 // Middleware
 app.use(cors()); // Enable Cross-Origin Resource Sharing
@@ -19,6 +21,8 @@ pool.query('SELECT NOW()', (err, res) => {
 
 // Routes
 app.use('/api', uploadRoutes);
+
+app.use('/api', personalityRoutes);
 
 // Test Route
 app.get('/', (req, res) => {
