@@ -169,7 +169,7 @@ node database/migrate.js
 1. Start the backend server:
 ```bash
 cd backend
-npm start
+node app.js
 ```
 The backend server will start on http://localhost:5000
 
