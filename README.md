@@ -94,6 +94,30 @@ UPLOAD_DIR=./uploads
 mkdir uploads
 ```
 
+### Backend Dependencies
+
+Navigate to the backend directory and install the required packages:
+```bash
+cd backend
+npm install dotenv --save  # Install dotenv locally
+npm install               # Install other dependencies
+```
+
+Key backend dependencies:
+- `dotenv` - Environment variables management
+- `express` - Web framework
+- `pg` - PostgreSQL client
+- `cors` - Cross-Origin Resource Sharing
+- `multer` - File upload handling
+- `@google-cloud/translate` - Google Cloud Translation
+- `body-parser` - Request body parsing
+- `pdf-parse` - PDF file parsing
+- `@huggingface/inference` - AI model inference
+- `compromise` - Natural language processing
+- `axios` - HTTP client
+- `fs` - File system operations
+
+
 ### 3. Frontend Setup
 
 1. Navigate to the frontend directory:
