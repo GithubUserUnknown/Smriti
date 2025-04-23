@@ -36,7 +36,10 @@ app.use(compression());
 // Security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
+  // Only set X-Frame-Options for routes that do not need iframe embedding
+  if (!req.path.startsWith('/chatbot')) {
+    res.setHeader('X-Frame-Options', 'DENY');
+  }
   res.setHeader('X-XSS-Protection', '1; mode=block');
   next();
 });
