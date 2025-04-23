@@ -81,8 +81,6 @@ app.use('/api', personalityRoutes);
 
 app.use('/api/chat', chatRoutes);
 
-app.use('/api/auth', authRoutes);
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

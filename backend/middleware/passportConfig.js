@@ -6,7 +6,8 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://smriti-y3xy.onrender.com/auth/google/callback',
+      callbackURL: '/auth/google/callback',  // Make this relative
+      proxy: true
     },
     (accessToken, refreshToken, profile, done) => {
       // Pass the entire profile to the callback

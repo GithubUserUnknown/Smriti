@@ -29,9 +29,11 @@ const LoginPage = ({ onLogin }) => {
   const handleGoogleLogin = () => {
     // Add error handling and loading state
     try {
-      const googleAuthUrl = `${process.env.REACT_APP_API_URL}/auth/google`;
-      // Save the current URL to redirect back after login
+      // Store the current URL for redirect after login
       sessionStorage.setItem('redirectUrl', window.location.pathname);
+      
+      // Construct the Google auth URL using the backend URL
+      const googleAuthUrl = `${process.env.REACT_APP_API_URL}/auth/google`;
       window.location.href = googleAuthUrl;
     } catch (error) {
       console.error('Google login error:', error);
