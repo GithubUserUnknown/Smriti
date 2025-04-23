@@ -20,7 +20,7 @@ const generateJWT = (user) => {
   );
 };
 
-router.get('/google/callback', 
+router.get('auth/google/callback', 
   passport.authenticate('google', { failureRedirect: '/login' }),
   async (req, res) => {
     try {
@@ -67,7 +67,7 @@ router.get('/google/callback',
   }
 );
 
-router.get('/google', 
+router.get('auth/google', 
   passport.authenticate('google', { 
     scope: ['profile', 'email'],
     prompt: 'select_account'
