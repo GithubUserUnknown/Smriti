@@ -1,275 +1,163 @@
-# Smriti (An easy to setup chatbot for websites)
+# Smriti - AI-Powered Website Chatbot
 
-This project is an AI chatbot for websites that want the chatbot to be able to answer questions about their company or products with the help of uploaded documents, and also provide conversational features. It features a chatbot interface that can answer questions about the uploaded documents, and also provide conversational features.
+Smriti is a modern, AI-powered chatbot solution that enables websites to provide intelligent responses based on uploaded documents while maintaining natural conversational abilities. Built with Node.js, React, and PostgreSQL, it leverages Google's Gemini API for advanced language processing.
 
-## Features
+## 🚀 Features
 
-- Document upload and storage with AI-powered analysis
-- AI chatbot for document queries
-- Document categorization and tagging
-- Search functionality
-- PostgreSQL database integration
-- Secure file handling
+- 🤖 AI-powered document analysis and response generation
+- 📄 Document upload and management system
+- 🏷️ Automatic document categorization and tagging
+- 🔍 Advanced search capabilities
+- 🎯 Customizable AI personalities
+- 📊 Response rating and feedback system
+- 🔐 Secure authentication and file handling
+- 📱 Responsive web interface
 
-## Prerequisites
+## 🛠️ Tech Stack
 
-Before running this project, make sure you have:
+- **Frontend**: React 19
+- **Backend**: Node.js with Express
+- **Database**: PostgreSQL
+- **AI**: Google Cloud Gemini API
+- **Authentication**: JWT, Passport.js
+- **File Processing**: Multer, pdf-parse
 
-1. Node.js installed (v16 or higher)
-2. PostgreSQL installed and running
-3. npm or yarn package manager
-4. Google Cloud Gemini API key
+## 📋 Prerequisites
 
-## Installation and Setup
+- Node.js (v16 or higher)
+- PostgreSQL (latest stable version)
+- npm or yarn
+- Google Cloud Gemini API key
 
-### 1. Clone the Repository
+## 🔧 Installation
 
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/GithubUserUnknown/smriti.git
+   cd smriti
+   ```
+
+2. **Environment Setup**
+   ```bash
+   # Backend environment
+   cp .env.example backend/.env
+   
+   # Update .env with your credentials
+   # Required variables:
+   # - DB_* (Database credentials)
+   # - GEMINI_API_KEY
+   # - NODE_ENV
+   # - PORT
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   # Backend
+   cd backend
+   npm install
+
+   # Frontend
+   cd ../frontend
+   npm install
+   ```
+
+4. **Database Setup**
+   ```bash
+   # Create database
+   psql -U postgres
+   CREATE DATABASE smritidb;
+   
+   # Run migrations
+   cd backend
+   npm run migrate
+   ```
+
+## 🚀 Running the Application
+
+### Development Mode
 ```bash
-git clone <repository-url>
-cd <project-directory>
-```
-
-### 2. Backend Setup
-
-1. Navigate to the backend directory:
-```bash
-cd backend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-This will install the following required packages from package.json:
-- express
-- pg (PostgreSQL client)
-- dotenv
-- cors
-- multer
-- @google-cloud/translate
-- body-parser
-- pdf-parse
-- @huggingface/inference
-- compromise
-
-### Database Configuration
-
-1. Copy the database configuration template:
-```bash
-cp backend/dbConfig.template.js backend/dbConfig.js
-```
-
-2. Create a `.env` file in the backend directory with your database credentials:
-```env
-DB_USER=your_username
-DB_HOST=your_host
-DB_NAME=your_database_name
-DB_PASSWORD=your_password
-DB_PORT=your_port
-
-# Database Configuration example for localhost
-DB_USER=postgres
-DB_HOST=localhost
-DB_NAME=smritidbp
-DB_PASSWORD=your_password
-DB_PORT=5432
-
-# Server Configuration
-PORT=5000
-
-
-# Server Configuration
-PORT=5000
-
-# API Keys
-GEMINI_API_KEY=your_gemini_api_key
-
-# Other Configuration
-UPLOAD_DIR=./uploads
-```
-
-4. Create the uploads directory:
-```bash
-mkdir uploads
-```
-
-### Backend Dependencies
-
-Navigate to the backend directory and install the required packages:
-```bash
-cd backend
-npm install dotenv --save  # Install dotenv locally
-npm install               # Install other dependencies
-```
-
-Key backend dependencies:
-- `dotenv` - Environment variables management
-- `express` - Web framework
-- `pg` - PostgreSQL client
-- `cors` - Cross-Origin Resource Sharing
-- `multer` - File upload handling
-- `@google-cloud/translate` - Google Cloud Translation
-- `body-parser` - Request body parsing
-- `pdf-parse` - PDF file parsing
-- `@huggingface/inference` - AI model inference
-- `compromise` - Natural language processing
-- `axios` - HTTP client
-- `fs` - File system operations
-
-
-### 3. Frontend Setup
-
-1. Navigate to the frontend directory:
-```bash
-cd frontend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-This will install React and other required frontend packages.
-
-### 4. Database Setup
-
-1. Create a PostgreSQL database named `smritidbp`:
-```sql
-CREATE DATABASE smritidbp;
-```
-
-2. Create the required tables:
-```sql
--- Files table for document storage
-CREATE TABLE IF NOT EXISTS files (
-    id SERIAL PRIMARY KEY,
-    description TEXT,
-    tags TEXT[],
-    category VARCHAR(100),
-    filename VARCHAR(255),
-    filepath VARCHAR(255),
-    upload_date TIMESTAMP DEFAULT NOW(),
-    parsed_content TEXT
-);
-
--- Personalities table for AI personality configurations
-CREATE TABLE IF NOT EXISTS personalities (
-    id SERIAL PRIMARY KEY,
-    user_id VARCHAR(100),
-    name VARCHAR(100),
-    gender VARCHAR(50),
-    age INTEGER,
-    behavior_prompt TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Query history table for tracking AI interactions
-CREATE TABLE IF NOT EXISTS query_history (
-    id SERIAL PRIMARY KEY,
-    query TEXT,
-    response TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Ratings table for response feedback
-CREATE TABLE IF NOT EXISTS ratings (
-    id SERIAL PRIMARY KEY,
-    query TEXT,
-    response TEXT,
-    rating INTEGER,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-3. Run the database migration:
-```bash
-cd backend
-node database/migrate.js
-```
-
-## Running the Application
-
-1. Start the backend server:
-```bash
+# Terminal 1 - Backend
 cd backend
 node app.js
-```
-The backend server will start on http://localhost:5000
 
-2. In a new terminal, start the frontend development server:
-```bash
+# Terminal 2 - Frontend
 cd frontend
 npm start
 ```
-The frontend application will open in your browser at http://localhost:3000
 
-## Common Issues and Troubleshooting
+### Production Mode
+```bash
+# Backend
+cd backend
+NODE_ENV=production npm start
 
-1. If you get a module not found error:
-   - Make sure you've run `npm install` in both frontend and backend directories
-   - Check if all dependencies are properly listed in package.json
-
-2. Database Connection Issues:
-   - Ensure PostgreSQL is running
-   - Verify credentials in `.env`
-   - Check if `pg` module is installed
-   ```bash
-   npm install pg
-   ```
-
-3. File Upload Issues:
-   - Ensure `multer` is installed
-   - Check if uploads directory exists
-   ```bash
-   mkdir backend/uploads
-   ```
-
-4. PDF Parsing Issues:
-   - Install pdf-parse dependencies
-   ```bash
-   npm install pdf-parse
-   ```
-
-5. CORS Issues:
-   - Verify cors middleware is properly configured
-   ```bash
-   npm install cors
-   ```
-
-6. Environment Variables:
-   - Ensure dotenv is installed
-   ```bash
-   npm install dotenv
-   ```
-
-7. API key issues:
-   - Verify your Gemini API key is valid
-   - Check if the API key is properly set in the .env file
-
-## Project Structure
-
+# Frontend
+cd frontend
+npm run build
 ```
+
+## 🔒 Security Features
+
+- JWT-based authentication
+- Rate limiting
+- CORS protection
+- Secure file upload handling
+- Production logging controls
+- Environment-based security configurations
+
+## 📁 Project Structure
+```
+smriti/
 ├── backend/
-│   ├── database/
-│   │   └── migrate.js
-│   ├── routes/
-│   │   ├── uploadRoutes.js
-│   │   └── personalityRoutes.js
-│   ├── package.json
-│   └── .env
+│   ├── controllers/    # Request handlers
+│   ├── middleware/     # Custom middleware
+│   ├── routes/         # API routes
+│   ├── utils/          # Helper functions
+│   ├── database/       # Database migrations
+│   └── app.js         # Main application file
 ├── frontend/
-│   ├── public/
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   └── App.js
-│   └── package.json
+│   │   ├── components/ # React components
+│   │   ├── pages/      # Page components
+│   │   ├── utils/      # Helper functions
+│   │   └── App.js      # Root component
+│   └── public/         # Static files
 └── README.md
 ```
 
-## License
+## 🔍 API Documentation
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Key endpoints:
+- `POST /api/auth/login` - User authentication
+- `POST /api/upload` - Document upload
+- `POST /api/chat` - Chat interaction
+- `GET /api/documents` - Retrieve documents
+- `POST /api/personalities` - Manage AI personalities
+
+## 🐛 Troubleshooting
+
+1. **Connection Issues**
+   - Verify PostgreSQL is running
+   - Check environment variables
+   - Confirm port availability
+
+2. **Upload Problems**
+   - Verify upload directory permissions
+   - Check file size limits
+   - Confirm supported file types
+
+3. **API Key Issues**
+   - Validate Gemini API key
+   - Check API quota limits
+   - Verify environment variables
+
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Support
+
+For support, email support@smriti.ai or open an issue in the repository.
 
 

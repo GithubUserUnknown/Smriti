@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import api from '../utils/api'; // Use the configured api instance
 
 const PersonalityManager = ({ userId, onSelectPersonality }) => {
   const [personalities, setPersonalities] = useState([]);
@@ -15,35 +16,90 @@ const PersonalityManager = ({ userId, onSelectPersonality }) => {
   // Fetch saved personalities for the current user
   useEffect(() => {
     const fetchPersonalities = async () => {
+      if (!userId) {
+        console.log('No userId provided, skipping personality fetch');
+        return;
+      }
+
       try {
-        const res = await axios.get('http://localhost:5000/api/personalities', {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const res = await api.get('/api/personalities', {
           params: { userId },
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
-        setPersonalities(res.data.personalities);
+        
+        setPersonalities(res.data.personalities || []);
+        
+        // If there are personalities and none is selected, select the first one
+        if (res.data.personalities?.length > 0 && !selectedPersonality) {
+          const firstPersonality = res.data.personalities[0];
+          setSelectedPersonality(String(firstPersonality.id));
+          onSelectPersonality(firstPersonality);
+        }
       } catch (error) {
         console.error('Error fetching personalities:', error.message);
+        if (error.response?.status === 401) {
+          // Handle unauthorized access
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+        setPersonalities([]);
       }
     };
+
     fetchPersonalities();
-  }, [userId]);
+  }, [userId, onSelectPersonality]);
 
   // Create a new personality
   const handleCreate = async (e) => {
     e.preventDefault();
+    if (!userId) {
+      setMessage('User ID is required to create a personality.');
+      return;
+    }
+
     try {
-      const res = await axios.post('http://localhost:5000/api/personalities', {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const res = await api.post('/api/personalities', {
         userId,
-        ...form,
+        ...form
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
+      
       setMessage('Personality created successfully!');
       // Refresh personality list
       setPersonalities((prev) => [res.data.personality, ...prev]);
       // Automatically select the newly created personality
       setSelectedPersonality(String(res.data.personality.id));
       onSelectPersonality(res.data.personality);
+      
+      // Clear form
+      setForm({
+        name: '',
+        gender: 'girl',
+        age: 23,
+        behaviorPrompt: '',
+      });
     } catch (error) {
       console.error('Error creating personality:', error.message);
-      setMessage('Failed to create personality.');
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+      setMessage('Failed to create personality. Please try again.');
     }
   };
 

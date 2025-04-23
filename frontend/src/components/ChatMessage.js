@@ -1,55 +1,62 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function ChatMessage({ message, onSubmitRating }) {
   const [localRating, setLocalRating] = useState(0);
   const [faded, setFaded] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleStarClick = (ratingValue) => {
-    if (localRating === 0) { // Allow rating only once per message
-      setLocalRating(ratingValue);
-      setTimeout(() => {
-        setFaded(true);
-        onSubmitRating(ratingValue);
-      }, 500);
+  const handleStarClick = async (ratingValue) => {
+    try {
+      if (localRating === 0) { // Allow rating only once per message
+        setLocalRating(ratingValue);
+        await onSubmitRating(ratingValue);
+        setTimeout(() => {
+          setFaded(true);
+        }, 500);
+      }
+    } catch (error) {
+      setError('Failed to submit rating');
+      setLocalRating(0); // Reset rating on error
+      console.error('Rating submission error:', error);
     }
   };
 
   return (
-    <div style={{ marginBottom: '15px' }}>
-      {/* User's message */}
-      <div style={{ textAlign: 'right', marginBottom: '5px', color: '#007bff' }}>
-        <strong>You:</strong> {message.user}
-      </div>
-
-      {/* AI's response */}
-      <div
-        style={{
-          textAlign: 'left',
-          backgroundColor: '#eef',
-          padding: '10px',
-          borderRadius: '5px',
-          position: 'relative'
-        }}
-      >
-        <strong>AI:</strong> {message.ai}
-
-        {/* Display images from the database if available */}
-        {message.imagePaths && message.imagePaths.length > 0 && (
-          <div style={{ marginTop: '10px' }}>
-            {message.imagePaths.map((img, i) => (
-              <img
-                key={i}
-                src={img} // Use the URL provided by the database. Adjust if a prefix is needed.
-                alt="Associated"
-                style={{
-                  maxWidth: '150px',
-                  marginRight: '10px',
-                  borderRadius: '4px'
-                }}
-              />
-            ))}
+    <div className="message-wrapper">
+      {/* User Message */}
+      {message.user && (
+        <div className="message user">
+          <div className="message-content">
+            <p>{message.user}</p>
           </div>
-        )}
+          <div className="message-metadata">
+            <span className="timestamp">
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* AI Message */}
+      {message.ai && (
+        <div className="message ai">
+          <div className="message-content">
+            <p>{message.ai}</p>
+            
+            {/* Image Display */}
+            {message.imagePaths && message.imagePaths.length > 0 && (
+              <div className="message-images">
+                {message.imagePaths.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    alt="AI Generated"
+                    className="message-image"
+                  />
+                ))}
+              </div>
+            )}
 
         {/* Star Rating Section */}
         {!faded && (
@@ -77,6 +84,13 @@ function ChatMessage({ message, onSubmitRating }) {
           </div>
         )}
       </div>
+      <div className="message-metadata">
+            <span className="timestamp">
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

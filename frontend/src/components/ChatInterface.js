@@ -2,10 +2,25 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import ChatMessage from './ChatMessage';
 import PersonalityManager from './PersonalityManager';
+import api from '../utils/api';
+import '../styles/ChatInterface.css';
+import EmojiPicker from 'emoji-picker-react';
+import { useSpeechRecognition } from 'react-speech-recognition';
 
-const ChatInterface = () => {
+const ChatInterface = ({ config = {} }) => {
+  // Destructure configuration with defaults
+  const {
+    enableEmoji = true,
+    enableAttachments = true,
+    enableVoice = true,
+  } = config;
+
   const [query, setQuery] = useState('');
   const [conversation, setConversation] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [personalityConfig, setPersonalityConfig] = useState({
     name: 'Smriti',
     gender: 'female',
@@ -14,13 +29,57 @@ const ChatInterface = () => {
   });
   const [persistCompanyContext, setPersistCompanyContext] = useState('');
   const [persistCompanyCount, setPersistCompanyCount] = useState(0); // count for persisting company data over next 5 queries
-
-  const userId = 'user123'; // Replace with real user ID in production
+  const [isFocused, setIsFocused] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const fileInputRef = useRef(null);
+  
+  // Voice recognition setup
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition
+  } = useSpeechRecognition();
 
   const chatWindowRef = useRef(null);
+  const inputRef = useRef(null);
+  const lastMessageRef = useRef(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const storedToken = localStorage.getItem('token');
+        if (!storedToken) {
+          throw new Error('No authentication token found');
+        }
+
+        const userResponse = await api.get('/api/auth/user-data', {
+          headers: {
+            'Authorization': `Bearer ${storedToken}`
+          }
+        });
+        setUserId(userResponse.data.googleId);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setError('Failed to load user data');
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   useEffect(() => {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+    }
+  }, [conversation]);
+
+  useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [conversation]);
 
@@ -33,6 +92,11 @@ const ChatInterface = () => {
   };
 
   const handleQuery = async () => {
+    if (!userId) {
+      console.error('User ID not available');
+      return;
+    }
+
     if (query.trim() === '') {
       alert('Please enter a message before sending!');
       return;
@@ -47,11 +111,16 @@ const ChatInterface = () => {
       userId,
       ...personalityConfig,
       conversationHistory: contextSummary,
-      persistentCompanyContext: persistCompanyContext // include persistent value if it exists
+      persistentCompanyContext: persistCompanyContext
     };
 
     try {
-      const res = await axios.post('http://localhost:5000/api/ai-query', payload);
+      const token = localStorage.getItem('token');
+      const res = await axios.post('http://localhost:5000/api/ai-query', payload, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const newResponse = {
         user: query,
         ai: res.data?.response || 'Oops! I could not generate a response this time.',
@@ -98,72 +167,174 @@ const ChatInterface = () => {
     });
   };
 
+  // Handle file attachment
+  const handleFileAttachment = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Add file handling logic here
+      // You might want to upload to a server or process it
+      console.log('File attached:', file);
+    }
+  };
+
+  // Handle emoji selection
+  const onEmojiClick = (event, emojiObject) => {
+    setQuery(prevQuery => prevQuery + emojiObject.emoji);
+    setShowEmojiPicker(false);
+  };
+
+  // Handle voice input
+  const handleVoiceInput = () => {
+    if (listening) {
+      setIsRecording(false);
+      // Add transcript to query
+      setQuery(prevQuery => prevQuery + ' ' + transcript);
+      resetTranscript();
+    } else {
+      setIsRecording(true);
+      resetTranscript();
+    }
+  };
+
+  const handleSubmitRating = async (message, ratingValue) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      await api.post('/api/submit-rating', {
+        query: message.user,
+        response: message.ai,
+        rating: ratingValue
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      // Remove success log
+      // console.log('Rating submitted successfully!');
+    } catch (error) {
+      
+      console.error('Failed to submit rating');
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
-      <h2>Chat with AI</h2>
-
-      {/* Personality Management Component */}
-      <PersonalityManager userId={userId} onSelectPersonality={handleSelectPersonality} />
-
-      {/* Chat Window */}
-      <div
-        ref={chatWindowRef}
-        style={{
-          border: '1px solid #ccc',
-          borderRadius: '8px',
-          padding: '10px',
-          height: '400px',
-          overflowY: 'auto',
-          marginBottom: '20px',
-          backgroundColor: '#f9f9f9',
-        }}
-      >
-        {conversation.map((msg, index) => (
-          <ChatMessage
-            key={index}
-            message={msg}
-            onSubmitRating={(ratingValue) => {
-              // Rating submission logic (can be implemented as needed)
-              axios
-                .post('http://localhost:5000/api/submit-rating', {
-                  query: msg.user,
-                  response: msg.ai,
-                  rating: ratingValue,
-                })
-                .then(() => console.log('Rating submitted!'))
-                .catch((err) => console.error('Rating submission error:', err.message));
-            }}
-          />
-        ))}
+    <div className="chat-interface">
+      <div className="chat-header">
+        <h2 className="chat-title">
+          <i className="fas fa-robot"></i>
+          Chat with {personalityConfig.name}
+        </h2>
+        <PersonalityManager userId={userId} onSelectPersonality={handleSelectPersonality} />
       </div>
 
-      {/* Query Input Block */}
-      <textarea
-        placeholder="Type your query here..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={handleKeyPress}
-        rows="4"
-        style={{
-          width: '100%',
-          marginBottom: '10px',
-          borderRadius: '5px',
-          border: '1px solid #ccc',
-        }}
-      />
-      <button
-        onClick={handleQuery}
-        style={{
-          padding: '10px 20px',
-          borderRadius: '5px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          cursor: 'pointer',
-        }}
-      >
-        Send
-      </button>
+      <div ref={chatWindowRef} className="chat-window">
+        {conversation.map((msg, index) => (
+          <div
+            ref={index === conversation.length - 1 ? lastMessageRef : null}
+            key={index}
+          >
+            <ChatMessage 
+              message={msg} 
+              isUser={Boolean(msg.user)}
+              showAvatar={true}
+              showTimestamp={true}
+              onSubmitRating={(ratingValue) => handleSubmitRating(msg, ratingValue)}
+            />
+          </div>
+        ))}
+        {isTyping && (
+          <div className="typing-indicator">
+            <div className="typing-dot"></div>
+            <div className="typing-dot"></div>
+            <div className="typing-dot"></div>
+          </div>
+        )}
+      </div>
+
+      <div className={`chat-input-container ${isFocused ? 'focused' : ''}`}>
+        {showEmojiPicker && enableEmoji && (
+          <div className="emoji-picker-container">
+            <EmojiPicker onEmojiClick={onEmojiClick} />
+          </div>
+        )}
+        
+        <div className="input-toolbar">
+          {enableEmoji && (
+            <button 
+              className="toolbar-button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              title="Emoji picker"
+            >
+              <i className="far fa-smile"></i>
+            </button>
+          )}
+          
+          {enableAttachments && (
+            <button 
+              className="toolbar-button"
+              onClick={() => fileInputRef.current.click()}
+              title="Attach file"
+            >
+              <i className="fas fa-paperclip"></i>
+            </button>
+          )}
+          
+          {enableVoice && browserSupportsSpeechRecognition && (
+            <button 
+              className={`toolbar-button ${isRecording ? 'recording' : ''}`}
+              onClick={handleVoiceInput}
+              title="Voice input"
+            >
+              <i className={`fas fa-microphone${isRecording ? '-slash' : ''}`}></i>
+            </button>
+          )}
+          
+          {enableAttachments && (
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileAttachment}
+              style={{ display: 'none' }}
+            />
+          )}
+        </div>
+
+        <textarea
+          ref={inputRef}
+          className="chat-textarea"
+          placeholder="Type your message here..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyPress}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          rows={1}
+        />
+        
+        <button 
+          className="send-button" 
+          onClick={handleQuery}
+          disabled={!query.trim()}
+          aria-label="Send message"
+        >
+          <i className="fas fa-paper-plane"></i>
+        </button>
+      </div>
     </div>
   );
 };

@@ -13,6 +13,7 @@
 /frontend/.env.development.local
 /frontend/.env.test.local
 /frontend/.env.production.local
+/backend/.env
 
 # Logs
 npm-debug.log*

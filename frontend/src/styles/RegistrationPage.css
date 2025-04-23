@@ -1,0 +1,63 @@
+/* Shared styles for Login and Registration Pages */
+.container {
+  width: 300px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  text-align: center;
+}
+
+h2 {
+  font-family: Arial, sans-serif;
+  color: #333333;
+  margin-bottom: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555555;
+}
+
+input {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+}
+
+button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.google-login-btn {
+  margin-top: 10px;
+  background-color: #4285f4;
+}
+
+.google-login-btn:hover {
+  background-color: #357ae8;
+}
+
+.message {
+  margin-top: 15px;
+  font-weight: bold;
+  color: #ff6347;
+}
