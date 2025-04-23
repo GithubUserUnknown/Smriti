@@ -1,26 +1,33 @@
-# Smriti (An easy to setup chatbot for websites)
+# Smriti AI Generator  
+**Elevate Your Website with Next-Gen AI in Under 60 Seconds**
 
-This project is an AI chatbot for websites that want the chatbot to be able to answer questions about their company or products with the help of uploaded documents, and also provide conversational features. It features a chatbot interface that can answer questions about the uploaded documents, and also provide conversational features.
+Smriti AI Generator allows websites to integrate an intelligent AI chatbot that can answer questions based on uploaded documents—ideal for customer support, product info, and internal knowledge bases.
 
-## Features
+🔗 **Live Demo:** [https://smriti-ai-generator.onrender.com/](https://smriti-ai-generator.onrender.com/)
 
-- Document upload and storage with AI-powered analysis
-- AI chatbot for document queries
-- Document categorization and tagging
-- Search functionality
-- PostgreSQL database integration
-- Secure file handling
+---
 
-## Prerequisites
+## ✨ Features
 
-Before running this project, make sure you have:
+- 🧠 AI chatbot trained on your documents  
+- 📄 PDF document parsing and storage  
+- 🔍 Full-text search and categorization  
+- 🏷️ Tagging and smart metadata  
+- 🗃️ PostgreSQL integration  
+- 🔐 Secure file handling and scalable backend
 
-1. Node.js installed (v16 or higher)
-2. PostgreSQL installed and running
-3. npm or yarn package manager
-4. Google Cloud Gemini API key
+---
 
-## Installation and Setup
+## 📦 Prerequisites
+
+- Node.js v16+  
+- PostgreSQL  
+- npm or Yarn  
+- Google Cloud Gemini API key
+
+---
+
+## 🚀 Getting Started
 
 ### 1. Clone the Repository
 
@@ -29,119 +36,48 @@ git clone <repository-url>
 cd <project-directory>
 ```
 
+---
+
 ### 2. Backend Setup
 
-1. Navigate to the backend directory:
 ```bash
 cd backend
-```
-
-2. Install dependencies:
-```bash
 npm install
 ```
 
-This will install the following required packages from package.json:
-- express
-- pg (PostgreSQL client)
-- dotenv
-- cors
-- multer
-- @google-cloud/translate
-- body-parser
-- pdf-parse
-- @huggingface/inference
-- compromise
+#### 🔧 Configure Environment
 
-### Database Configuration
+Create a `.env` file in the `backend/` directory:
 
-1. Copy the database configuration template:
-```bash
-cp backend/dbConfig.template.js backend/dbConfig.js
-```
-
-2. Create a `.env` file in the backend directory with your database credentials:
 ```env
-DB_USER=your_username
-DB_HOST=your_host
-DB_NAME=your_database_name
-DB_PASSWORD=your_password
-DB_PORT=your_port
-
-# Database Configuration example for localhost
 DB_USER=postgres
 DB_HOST=localhost
 DB_NAME=smritidbp
 DB_PASSWORD=your_password
 DB_PORT=5432
-
-# Server Configuration
 PORT=5000
-
-
-# Server Configuration
-PORT=5000
-
-# API Keys
 GEMINI_API_KEY=your_gemini_api_key
-
-# Other Configuration
 UPLOAD_DIR=./uploads
 ```
 
-4. Create the uploads directory:
+Create uploads directory:
+
 ```bash
 mkdir uploads
 ```
 
-### Backend Dependencies
+#### 🛠️ Database Setup
 
-Navigate to the backend directory and install the required packages:
-```bash
-cd backend
-npm install dotenv --save  # Install dotenv locally
-npm install               # Install other dependencies
-```
+Start PostgreSQL and run the following to create the database:
 
-Key backend dependencies:
-- `dotenv` - Environment variables management
-- `express` - Web framework
-- `pg` - PostgreSQL client
-- `cors` - Cross-Origin Resource Sharing
-- `multer` - File upload handling
-- `@google-cloud/translate` - Google Cloud Translation
-- `body-parser` - Request body parsing
-- `pdf-parse` - PDF file parsing
-- `@huggingface/inference` - AI model inference
-- `compromise` - Natural language processing
-- `axios` - HTTP client
-- `fs` - File system operations
-
-
-### 3. Frontend Setup
-
-1. Navigate to the frontend directory:
-```bash
-cd frontend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-This will install React and other required frontend packages.
-
-### 4. Database Setup
-
-1. Create a PostgreSQL database named `smritidbp`:
 ```sql
 CREATE DATABASE smritidbp;
 ```
 
-2. Create the required tables:
+Create required tables:
+
 ```sql
--- Files table for document storage
+-- Files
 CREATE TABLE IF NOT EXISTS files (
     id SERIAL PRIMARY KEY,
     description TEXT,
@@ -153,7 +89,7 @@ CREATE TABLE IF NOT EXISTS files (
     parsed_content TEXT
 );
 
--- Personalities table for AI personality configurations
+-- Personalities
 CREATE TABLE IF NOT EXISTS personalities (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(100),
@@ -164,7 +100,7 @@ CREATE TABLE IF NOT EXISTS personalities (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Query history table for tracking AI interactions
+-- Query History
 CREATE TABLE IF NOT EXISTS query_history (
     id SERIAL PRIMARY KEY,
     query TEXT,
@@ -172,7 +108,7 @@ CREATE TABLE IF NOT EXISTS query_history (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Ratings table for response feedback
+-- Ratings
 CREATE TABLE IF NOT EXISTS ratings (
     id SERIAL PRIMARY KEY,
     query TEXT,
@@ -182,81 +118,41 @@ CREATE TABLE IF NOT EXISTS ratings (
 );
 ```
 
-3. Run the database migration:
+Run migration script:
+
 ```bash
-cd backend
 node database/migrate.js
 ```
 
-## Running the Application
+Start backend server:
 
-1. Start the backend server:
 ```bash
-cd backend
 node app.js
 ```
-The backend server will start on http://localhost:5000
 
-2. In a new terminal, start the frontend development server:
+---
+
+### 3. Frontend Setup
+
 ```bash
 cd frontend
+npm install
 npm start
 ```
-The frontend application will open in your browser at http://localhost:3000
 
-## Common Issues and Troubleshooting
+Visit the app at: [http://localhost:3000](http://localhost:3000)
 
-1. If you get a module not found error:
-   - Make sure you've run `npm install` in both frontend and backend directories
-   - Check if all dependencies are properly listed in package.json
+---
 
-2. Database Connection Issues:
-   - Ensure PostgreSQL is running
-   - Verify credentials in `.env`
-   - Check if `pg` module is installed
-   ```bash
-   npm install pg
-   ```
-
-3. File Upload Issues:
-   - Ensure `multer` is installed
-   - Check if uploads directory exists
-   ```bash
-   mkdir backend/uploads
-   ```
-
-4. PDF Parsing Issues:
-   - Install pdf-parse dependencies
-   ```bash
-   npm install pdf-parse
-   ```
-
-5. CORS Issues:
-   - Verify cors middleware is properly configured
-   ```bash
-   npm install cors
-   ```
-
-6. Environment Variables:
-   - Ensure dotenv is installed
-   ```bash
-   npm install dotenv
-   ```
-
-7. API key issues:
-   - Verify your Gemini API key is valid
-   - Check if the API key is properly set in the .env file
-
-## Project Structure
+## 📁 Project Structure
 
 ```
+smriti-ai-generator/
 ├── backend/
 │   ├── database/
-│   │   └── migrate.js
 │   ├── routes/
-│   │   ├── uploadRoutes.js
-│   │   └── personalityRoutes.js
-│   ├── package.json
+│   ├── uploads/
+│   ├── app.js
 │   └── .env
 ├── frontend/
 │   ├── public/
@@ -264,12 +160,56 @@ The frontend application will open in your browser at http://localhost:3000
 │   │   ├── components/
 │   │   ├── pages/
 │   │   └── App.js
-│   └── package.json
 └── README.md
 ```
 
-## License
+---
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 🧩 Key Dependencies
 
+### Backend
 
+- `express` – Web server framework  
+- `pg` – PostgreSQL client  
+- `multer` – File upload handler  
+- `dotenv` – Manage environment variables  
+- `cors` – Cross-origin requests  
+- `pdf-parse` – PDF parsing  
+- `@huggingface/inference` – AI model API  
+- `@google-cloud/translate` – Translate API  
+- `compromise` – Lightweight NLP library
+
+### Frontend
+
+- `React` – UI library  
+- `axios` – HTTP client  
+- `react-router-dom` – Routing  
+- CSS framework (e.g., Tailwind or Bootstrap)
+
+---
+
+## 🧪 Troubleshooting
+
+- **Missing module errors:**  
+  Run `npm install` in both frontend and backend folders.
+
+- **Database issues:**  
+  Make sure PostgreSQL is running and `.env` values are correct.
+
+- **File upload not working:**  
+  Ensure `uploads/` exists and `multer` is installed.
+
+- **CORS errors:**  
+  Verify frontend URL is added to CORS config in backend.
+
+---
+
+## ☁️ Deployment
+
+This app is deployed and tested on **Render**. For deploying your own version, consult the [Render documentation](https://render.com/docs) and make sure your `.env` contains correct production credentials and URLs.
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
