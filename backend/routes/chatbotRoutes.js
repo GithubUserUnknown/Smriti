@@ -4,7 +4,7 @@ const router = express.Router();
 
 // Route to render the chatbot
 const authMiddleware = require('../middleware/authMiddleware');
-router.get('/chatbot', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   const { 
     apiKey, 
     token, 
@@ -110,7 +110,7 @@ router.get('/chatbot', authMiddleware, async (req, res) => {
               messages.appendChild(userDiv);
 
               try {
-                const response = await fetch('/api/chat', {
+                const response = await fetch('/api/chat/chatbot', {
                   method: 'POST',
                   headers: { 
                     'Content-Type': 'application/json',

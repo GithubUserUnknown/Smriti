@@ -7,10 +7,23 @@ const personalityRoutes = require('./routes/personalityRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const authRoutes = require('./routes/authRoutes');
 const chatbotRoutes = require('./routes/chatbotRoutes'); // Import chatbot routes
+const compression = require('compression');
 
 // Middleware
+const whitelist = [
+  process.env.REACT_APP_FRONTEND_URL,
+  'http://localhost:3000',
+  'https://smriti-ai-generator.onrender.com/'
+];
+
 app.use(cors({
-  origin: process.env.REACT_APP_FRONTEND_URL, // Your frontend URL
+  origin: function (origin, callback) {
+    if (!origin || whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -24,6 +37,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// Add compression middleware
+app.use(compression());
+
+// Add security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -31,7 +55,7 @@ app.get('/api/health', (req, res) => {
 
 const pool = require('./dbConfig');
 pool.query('SELECT NOW()', (err, res) => {
-    
+  console.log('Connected to database');
 });
 
 
@@ -58,9 +82,6 @@ app.use(passport.session());
 // Register authentication routes
 app.use('/auth', authRoutes);
 
-// Chatbot route
-app.use('/', chatbotRoutes);
-
 // Routes
 app.use('/api', uploadRoutes);
 
@@ -69,6 +90,9 @@ app.use('/api', personalityRoutes);
 app.use('/api/chat', chatRoutes);
 
 app.use('/api/auth', authRoutes);
+
+// Chatbot route
+app.use('/chatbot', chatbotRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -86,6 +110,7 @@ app.use((req, res) => {
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}`);
 });
