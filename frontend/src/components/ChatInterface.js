@@ -54,7 +54,7 @@ const ChatInterface = ({ config = {} }) => {
           throw new Error('No authentication token found');
         }
 
-        const userResponse = await api.get('/api/auth/user-data', {
+        const userResponse = await api.get('/auth/user-data', {
           headers: {
             'Authorization': `Bearer ${storedToken}`
           }

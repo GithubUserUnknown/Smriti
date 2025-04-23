@@ -30,7 +30,7 @@ const Dashboard = () => {
 
         // Fetch user data and stats in parallel
         const [userResponse] = await Promise.all([ // Fetch user data only for now
-          api.get('/api/auth/user-data')
+          api.get('/auth/user-data')
         ]);
 
         setApiKey(userResponse.data.apiKey);

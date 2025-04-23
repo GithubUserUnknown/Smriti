@@ -12,6 +12,7 @@ const Navbar = ({ isAuthenticated, user }) => {
   const handleLogout = () => {
     // Clear the token from localStorage
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     // Redirect to login page
     navigate('/login');
     // Refresh the page to reset all states
