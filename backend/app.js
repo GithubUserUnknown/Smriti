@@ -46,18 +46,18 @@ pool.query('SELECT NOW()', (err, res) => {
 const passport = require('./middleware/passportConfig'); // Import Passport configuration
 const session = require('express-session'); // For session handling
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key', // Ensure you have a secure secret
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production', // Enable secure cookies only in production
-      httpOnly: true, // Helps mitigate XSS attacks
-      maxAge: 1000 * 60 * 60 * 24, // Optional: Set cookie expiration time (1 day)
-    },
-  })
-);
+const PgSession = require('connect-pg-simple')(session);
+
+app.use(session({
+  store: new PgSession({
+    pool, // PostgreSQL connection pool
+    tableName: 'session' // Table name for storing sessions
+  }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 } // 7-day expiration
+}));
 
 // Initialize Passport.js
 app.use(passport.initialize());
