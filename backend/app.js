@@ -10,7 +10,7 @@ const chatbotRoutes = require('./routes/chatbotRoutes'); // Import chatbot route
 
 // Middleware
 app.use(cors({
-  origin: 'React_Frontend_Url', // Your frontend URL
+  origin: process.env.React_Frontend_Url,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -51,12 +51,17 @@ const PgSession = require('connect-pg-simple')(session);
 app.use(session({
   store: new PgSession({
     pool, // PostgreSQL connection pool
-    tableName: 'session' // Table name for storing sessions
+    tableName: 'session', // Table name for storing sessions
+    createTableIfMissing: true
   }),
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 } // 7-day expiration
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production', // Enable secure cookies in production
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-site cookies
+    maxAge: 7 * 24 * 60 * 60 * 1000 
+  }
 }));
 
 // Initialize Passport.js

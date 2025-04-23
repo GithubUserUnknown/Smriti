@@ -27,7 +27,16 @@ const LoginPage = ({ onLogin }) => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`; // Redirect to Google login
+    // Add error handling and loading state
+    try {
+      const googleAuthUrl = `${process.env.REACT_APP_API_URL}/auth/google`;
+      // Save the current URL to redirect back after login
+      sessionStorage.setItem('redirectUrl', window.location.pathname);
+      window.location.href = googleAuthUrl;
+    } catch (error) {
+      console.error('Google login error:', error);
+      setMessage('Failed to initiate Google login');
+    }
   };
 
   return (
