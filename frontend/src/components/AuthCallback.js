@@ -9,33 +9,39 @@ const AuthCallback = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get('token');
+    const error = params.get('error');
+    
+    if (error) {
+      console.error('Authentication error:', error);
+      navigate('/login');
+      return;
+    }
     
     if (token) {
-      // Store the token
-      localStorage.setItem('token', token);
-      
-      // Decode token to get user info
       try {
-        const decoded = jwtDecode(token); // Changed from jwt_decode to jwtDecode
-        // You might want to store user info in localStorage or context
+        const decoded = jwtDecode(token);
+        localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(decoded));
+        
+        // Log successful authentication
+        console.log('Authentication successful');
+        
+        navigate('/');
+        window.location.reload();
       } catch (error) {
-        console.error('Error decoding token:', error);
+        console.error('Error processing token:', error);
+        navigate('/login');
       }
-      
-      // Redirect to home page
-      navigate('/');
-      // Refresh the page to update all states
-      window.location.reload();
     } else {
-      // Handle error
+      console.error('No token received');
       navigate('/login');
     }
   }, [navigate, location]);
 
   return (
-    <div>
-      Processing authentication...
+    <div className="auth-callback-container">
+      <div className="loading-spinner"></div>
+      <p>Processing authentication...</p>
     </div>
   );
 };

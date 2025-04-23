@@ -56,8 +56,11 @@ router.get('/google/callback',
       // Generate JWT token
       const token = generateJWT(user.rows[0]);
       
-      // Redirect to frontend with token
-      res.redirect(`${process.env.REACT_APP_FRONTEND_URL}/auth-callback?token=${token}`);
+      // Log the redirect URL for debugging
+      const redirectUrl = `${process.env.REACT_APP_FRONTEND_URL}/auth-callback?token=${token}`;
+      console.log('Redirecting to:', redirectUrl);
+      
+      res.redirect(redirectUrl);
     } catch (error) {
       console.error('Error during Google OAuth callback:', error);
       res.redirect(`${process.env.REACT_APP_FRONTEND_URL}/login?error=auth_failed`);
