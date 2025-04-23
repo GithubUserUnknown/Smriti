@@ -24,16 +24,13 @@ router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   async (req, res) => {
     try {
-      console.log('Google Profile:', req.user); // Debug log
+      
 
       // Get profile data from req.user._json
       const googleId = req.user._json.sub.toString(); // ensure string
       const email = req.user._json.email;
       const name = req.user._json.name;
       const profilePhoto = req.user._json.picture;
-
-      // Debug log
-      console.log('Extracted data:', { googleId, email, name, profilePhoto });
 
       if (!email) {
         console.error('Error: Missing email in Google profile');
@@ -54,23 +51,17 @@ router.get('/google/callback',
         `;
         const values = [googleId, email, name, profilePhoto, apiKey];
         
-        // Debug log
-        console.log('Inserting new user with values:', values);
-        
         const result = await db.query(query, values);
         user = { rows: [result.rows[0]] };
       }
 
       // Generate JWT token
       const token = generateJWT(user.rows[0]);
-
-      // Debug log
-      console.log('Generated token:', token);
       
       // Redirect to frontend with token
       res.redirect(`http://localhost:3000/auth-callback?token=${token}`);
     } catch (error) {
-      console.error('Error during Google OAuth callback:', error);
+      console.error('Error during Google Authorization callback:', error);
       res.redirect('http://localhost:3000/login?error=auth_failed');
     }
   }
