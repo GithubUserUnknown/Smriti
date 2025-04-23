@@ -9,7 +9,7 @@ const RegistrationPage = () => {
 
   const handleRegister = async () => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', {
+      const res = await axios.post('REACT_APP_CHATBOT_URL/api/auth/register', {
         email,
         password,
       });
@@ -47,7 +47,7 @@ const RegistrationPage = () => {
 
         <button
   onClick={() => {
-    window.location.href = 'http://localhost:5000/auth/google';
+    window.location.href = 'REACT_APP_CHATBOT_URL/auth/google';
   }}
   className="google-login-btn"
 >

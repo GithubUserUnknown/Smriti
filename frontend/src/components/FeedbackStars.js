@@ -9,7 +9,7 @@ const handleRating = async (value) => {
     try {
         const token = localStorage.getItem('token');
         await axios.post(
-            'http://localhost:5000/api/submit-rating',  // ensure correct URL
+            'REACT_APP_CHATBOT_URL/api/submit-rating',  // ensure correct URL
             { query, response, rating: value },
             {
                 headers: {

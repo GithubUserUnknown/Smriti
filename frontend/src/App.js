@@ -18,7 +18,7 @@ function App() {
   useEffect(() => {
     const checkServerStatus = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/health');
+        const response = await fetch('React_Frontend_Url/api/health');
         if (!response.ok) {
           throw new Error('Server is not responding');
         }
