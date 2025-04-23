@@ -1,9 +1,9 @@
-# Smriti - AI Generator  
+# Smriti AI Generator  
 **Elevate Your Website with Next-Gen AI in Under 60 Seconds**
 
 Smriti AI Generator allows websites to integrate an intelligent AI chatbot that can answer questions based on uploaded documents—ideal for customer support, product info, and internal knowledge bases.
 
-🔗 **Live Demo:** [https://smriti-ai-generator.onrender.com/](Smriti - AI Generator)
+🔗 **Live Demo:** [https://smriti-ai-generator.onrender.com/](https://smriti-ai-generator.onrender.com/)
 
 ---
 
@@ -140,7 +140,7 @@ npm install
 npm start
 ```
 
-Visit the app at: [https://smriti-ai-generator.onrender.com/](Live Demo)
+Visit the app at: [https://smriti-ai-generator.onrender.com/](https://smriti-ai-generator.onrender.com/ )
 
 ---
 
