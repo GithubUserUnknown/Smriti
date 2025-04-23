@@ -181,7 +181,10 @@ const Dashboard = () => {
           ) : (
             <div className="no-personality">
               <p>No personality configured</p>
-              <button className="create-personality-button">
+              <button 
+                className="create-personality-button"
+                onClick={() => navigate('/')}
+              >
                 <i className="fas fa-plus"></i> Create Personality
               </button>
             </div>

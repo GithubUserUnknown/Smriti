@@ -26,7 +26,7 @@ const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
   const previewContainerRef = useRef(null);
   const [previewMode, setPreviewMode] = useState('desktop'); // desktop, tablet, mobile
 
-  const chatbotUrl = process.env.REACT_APP_CHATBOT_URL;
+  const chatbotUrl = process.env.REACT_APP_CHATBOT_URL || 'http://localhost:5000';
 
   // Safely handle personality parameters
   const name = personality?.name || 'Chatbot';
@@ -152,25 +152,26 @@ const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
 
       // Create new iframe for preview
       const iframe = document.createElement('iframe');
+      const previewUrl = new URL(`${chatbotUrl}/chatbot`);
       
-      // Construct URL with all necessary parameters
+      // Add all parameters to the URL
       const params = {
-        apiKey: encodeURIComponent(apiKey),
-        token: encodeURIComponent(token),
-        name: encodeURIComponent(name),
-        gender: encodeURIComponent(gender),
-        age: encodeURIComponent(age),
-        behaviorPrompt: encodeURIComponent(behaviorPrompt),
+        apiKey,
+        token,
+        name,
+        gender,
+        age,
+        behaviorPrompt,
         theme: customization.theme,
         position: customization.position,
-        buttonColor: encodeURIComponent(customization.buttonColor),
-        buttonText: encodeURIComponent(customization.buttonText),
-        headerColor: encodeURIComponent(customization.headerColor),
-        chatBubbleColor: encodeURIComponent(customization.chatBubbleColor),
-        fontFamily: encodeURIComponent(customization.fontFamily),
-        borderRadius: encodeURIComponent(customization.borderRadius),
-        animation: encodeURIComponent(customization.animation),
-        messageAlignment: encodeURIComponent(customization.messageAlignment),
+        buttonColor: customization.buttonColor,
+        buttonText: customization.buttonText,
+        headerColor: customization.headerColor,
+        chatBubbleColor: customization.chatBubbleColor,
+        fontFamily: customization.fontFamily,
+        borderRadius: customization.borderRadius,
+        animation: customization.animation,
+        messageAlignment: customization.messageAlignment,
         showTimestamp: customization.showTimestamp,
         showAvatar: customization.showAvatar,
         enableEmoji: customization.enableEmoji,
@@ -179,13 +180,11 @@ const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
         glassmorphism: customization.glassmorphism
       };
 
-      // Create URL with search params
-      const url = new URL(`${chatbotUrl}/chatbot`);
       Object.entries(params).forEach(([key, value]) => {
-        url.searchParams.append(key, value);
+        previewUrl.searchParams.append(key, value);
       });
 
-      iframe.src = url.toString();
+      iframe.src = previewUrl.toString();
       iframe.style.cssText = `
         width: ${embedSize.width}px;
         height: ${embedSize.height}px;
@@ -197,7 +196,6 @@ const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
         transition: all 0.3s ease;
       `;
       iframe.allow = "microphone; camera";
-      iframe.setAttribute('title', 'Chatbot Preview');
 
       if (previewContainerRef.current) {
         previewContainerRef.current.appendChild(iframe);
