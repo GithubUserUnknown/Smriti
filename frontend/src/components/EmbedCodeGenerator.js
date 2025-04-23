@@ -152,26 +152,25 @@ const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
 
       // Create new iframe for preview
       const iframe = document.createElement('iframe');
-      const previewUrl = new URL(`${chatbotUrl}/chatbot`);
       
-      // Add all parameters to the URL
+      // Construct URL with all necessary parameters
       const params = {
-        apiKey,
-        token,
-        name,
-        gender,
-        age,
-        behaviorPrompt,
+        apiKey: encodeURIComponent(apiKey),
+        token: encodeURIComponent(token),
+        name: encodeURIComponent(name),
+        gender: encodeURIComponent(gender),
+        age: encodeURIComponent(age),
+        behaviorPrompt: encodeURIComponent(behaviorPrompt),
         theme: customization.theme,
         position: customization.position,
-        buttonColor: customization.buttonColor,
-        buttonText: customization.buttonText,
-        headerColor: customization.headerColor,
-        chatBubbleColor: customization.chatBubbleColor,
-        fontFamily: customization.fontFamily,
-        borderRadius: customization.borderRadius,
-        animation: customization.animation,
-        messageAlignment: customization.messageAlignment,
+        buttonColor: encodeURIComponent(customization.buttonColor),
+        buttonText: encodeURIComponent(customization.buttonText),
+        headerColor: encodeURIComponent(customization.headerColor),
+        chatBubbleColor: encodeURIComponent(customization.chatBubbleColor),
+        fontFamily: encodeURIComponent(customization.fontFamily),
+        borderRadius: encodeURIComponent(customization.borderRadius),
+        animation: encodeURIComponent(customization.animation),
+        messageAlignment: encodeURIComponent(customization.messageAlignment),
         showTimestamp: customization.showTimestamp,
         showAvatar: customization.showAvatar,
         enableEmoji: customization.enableEmoji,
@@ -180,11 +179,13 @@ const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
         glassmorphism: customization.glassmorphism
       };
 
+      // Create URL with search params
+      const url = new URL(`${chatbotUrl}/chatbot`);
       Object.entries(params).forEach(([key, value]) => {
-        previewUrl.searchParams.append(key, value);
+        url.searchParams.append(key, value);
       });
 
-      iframe.src = previewUrl.toString();
+      iframe.src = url.toString();
       iframe.style.cssText = `
         width: ${embedSize.width}px;
         height: ${embedSize.height}px;
@@ -196,6 +197,7 @@ const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
         transition: all 0.3s ease;
       `;
       iframe.allow = "microphone; camera";
+      iframe.setAttribute('title', 'Chatbot Preview');
 
       if (previewContainerRef.current) {
         previewContainerRef.current.appendChild(iframe);
