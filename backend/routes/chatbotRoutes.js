@@ -1,9 +1,9 @@
 const express = require('express');
-const pool = require('../dbConfig'); // Database pool for PostgreSQL
+const pool = require('../dbConfig');
 const router = express.Router();
+const authMiddleware = require('../middleware/authMiddleware');
 
 // Route to render the chatbot
-const authMiddleware = require('../middleware/authMiddleware');
 router.get('/', authMiddleware, async (req, res) => {
   const { 
     apiKey, 
@@ -110,7 +110,7 @@ router.get('/', authMiddleware, async (req, res) => {
               messages.appendChild(userDiv);
 
               try {
-                const response = await fetch('/api/chat/chatbot', {
+                const response = await fetch('/api/chat', {
                   method: 'POST',
                   headers: { 
                     'Content-Type': 'application/json',
