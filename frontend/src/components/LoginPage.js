@@ -11,7 +11,7 @@ const LoginPage = ({ onLogin }) => {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post('REACT_APP_CHATBOT_URL/api/auth/login', {
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
         email,
         password,
       });
@@ -27,7 +27,7 @@ const LoginPage = ({ onLogin }) => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'REACT_APP_CHATBOT_URL/auth/google'; // Redirect to Google login
+    window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`; // Redirect to Google login
   };
 
   return (

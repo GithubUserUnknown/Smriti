@@ -1,7 +1,7 @@
 import React from 'react';
 
 const EmbedCodeComponent = ({ apiKey, token }) => {
-  const chatbotUrl = process.env.REACT_APP_CHATBOT_URL || 'http://localhost:5000';
+  const chatbotUrl = process.env.REACT_APP_CHATBOT_URL || 'https://smriti-y3xy.onrender.com';
 
   const embedCode = `<iframe
   src="${chatbotUrl}/chatbot?apiKey=${encodeURIComponent(apiKey)}&token=${encodeURIComponent(token)}"

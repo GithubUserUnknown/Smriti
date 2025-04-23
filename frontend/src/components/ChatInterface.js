@@ -116,7 +116,7 @@ const ChatInterface = ({ config = {} }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('REACT_APP_CHATBOT_URL/api/ai-query', payload, {
+      const res = await axios.post(`${process.env.REACT_APP_CHATBOT_URL}/api/ai-query`, payload, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

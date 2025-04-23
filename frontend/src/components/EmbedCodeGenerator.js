@@ -26,7 +26,7 @@ const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
   const previewContainerRef = useRef(null);
   const [previewMode, setPreviewMode] = useState('desktop'); // desktop, tablet, mobile
 
-  const chatbotUrl = process.env.REACT_APP_CHATBOT_URL || 'http://localhost:5000';
+  const chatbotUrl = process.env.REACT_APP_CHATBOT_URL || 'https://smriti-y3xy.onrender.com';
 
   // Safely handle personality parameters
   const name = personality?.name || 'Chatbot';

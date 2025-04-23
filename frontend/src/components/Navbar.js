@@ -6,7 +6,7 @@ const Navbar = ({ isAuthenticated, user }) => {
   const navigate = useNavigate();
 
   const handleGoogleLogin = () => {
-    window.location.href = 'REACT_APP_CHATBOT_URL/auth/google';
+    window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`;
   };
 
   const handleLogout = () => {
