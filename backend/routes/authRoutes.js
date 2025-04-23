@@ -25,7 +25,6 @@ router.get('/google/callback',
   async (req, res) => {
     try {
       
-
       // Get profile data from req.user._json
       const googleId = req.user._json.sub.toString(); // ensure string
       const email = req.user._json.email;
@@ -33,8 +32,7 @@ router.get('/google/callback',
       const profilePhoto = req.user._json.picture;
 
       if (!email) {
-        console.error('Error: Missing email in Google profile');
-        return res.redirect(`${process.env.React_Frontend_Url}/login?error=email_missing`);
+        return res.redirect(`${process.env.REACT_APP_FRONTEND_URL}/login?error=email_missing`);
       }
 
       // Check if user exists
@@ -59,10 +57,10 @@ router.get('/google/callback',
       const token = generateJWT(user.rows[0]);
       
       // Redirect to frontend with token
-      res.redirect(`${process.env.React_Frontend_Url}/auth-callback?token=${token}`);
+      res.redirect(`${process.env.REACT_APP_FRONTEND_URL}/auth-callback?token=${token}`);
     } catch (error) {
-      console.error('Error during Google Authorization callback:', error);
-      res.redirect(`${process.env.React_Frontend_Url}/login?error=auth_failed`);
+      console.error('Error during Google OAuth callback:', error);
+      res.redirect(`${process.env.REACT_APP_FRONTEND_URL}/login?error=auth_failed`);
     }
   }
 );

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import api from '../utils/api';
 import '../styles/RegistrationPage.css'; // External CSS for styling
 
 const RegistrationPage = () => {
@@ -9,7 +10,7 @@ const RegistrationPage = () => {
 
   const handleRegister = async () => {
     try {
-      const res = await axios.post(`${process.env.REACT_APP_CHATBOT_URL}/api/auth/register`, {
+      const res = await api.post('/api/auth/register', {
         email,
         password,
       });
@@ -47,7 +48,7 @@ const RegistrationPage = () => {
 
         <button
   onClick={() => {
-    window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`; // Redirect to Google login
+    window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`;
   }}
   className="google-login-btn"
 >

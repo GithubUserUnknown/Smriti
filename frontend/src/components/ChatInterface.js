@@ -115,12 +115,7 @@ const ChatInterface = ({ config = {} }) => {
     };
 
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${process.env.REACT_APP_CHATBOT_URL}/api/ai-query`, payload, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const res = await api.post('/api/ai-query', payload);
       const newResponse = {
         user: query,
         ai: res.data?.response || 'Oops! I could not generate a response this time.',
@@ -212,12 +207,11 @@ const ChatInterface = ({ config = {} }) => {
           'Authorization': `Bearer ${token}`
         }
       });
-      // Remove success log
-      // console.log('Rating submitted successfully!');
+      console.log('Rating submitted successfully!');
     } catch (error) {
-      
-      console.error('Failed to submit rating');
+      console.error('Failed to submit rating:', error.message);
       if (error.response?.status === 401) {
+        // Handle unauthorized access
         localStorage.removeItem('token');
         window.location.href = '/login';
       }

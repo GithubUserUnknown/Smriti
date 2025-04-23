@@ -8,13 +8,13 @@ const handleRating = async (value) => {
     setRating(value); // Update UI state
     try {
         const token = localStorage.getItem('token');
-        await axios.post(
-            `${process.env.REACT_APP_CHATBOT_URL}/api/submit-rating`,  // ensure correct URL
+        await api.post(
+            `${process.env.REACT_APP_API_URL}/api/submit-rating`,
             { query, response, rating: value },
             {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`  // Include the token here!
+                    'Authorization': `Bearer ${token}`
                 }
             }
         );

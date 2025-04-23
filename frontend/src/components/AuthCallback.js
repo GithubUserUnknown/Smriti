@@ -7,42 +7,35 @@ const AuthCallback = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const handleCallback = async () => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    
+    if (token) {
+      // Store the token
+      localStorage.setItem('token', token);
+      
+      // Decode token to get user info
       try {
-        const params = new URLSearchParams(location.search);
-        const token = params.get('token');
-        
-        if (!token) {
-          throw new Error('No token received');
-        }
-
-        // Store the token
-        localStorage.setItem('token', token);
-        
-        // Decode token to get user info
-        const decoded = jwtDecode(token);
+        const decoded = jwtDecode(token); // Changed from jwt_decode to jwtDecode
+        // You might want to store user info in localStorage or context
         localStorage.setItem('user', JSON.stringify(decoded));
-        
-        // Get the stored redirect URL or default to home
-        const redirectUrl = sessionStorage.getItem('redirectUrl') || '/';
-        sessionStorage.removeItem('redirectUrl'); // Clean up
-        
-        navigate(redirectUrl);
-        window.location.reload(); // Refresh to update auth state
       } catch (error) {
-        console.error('Auth callback error:', error);
-        navigate('/login', { 
-          state: { error: 'Authentication failed. Please try again.' } 
-        });
+        console.error('Error decoding token:', error);
       }
-    };
-
-    handleCallback();
+      
+      // Redirect to home page
+      navigate('/');
+      // Refresh the page to update all states
+      window.location.reload();
+    } else {
+      // Handle error
+      navigate('/login');
+    }
   }, [navigate, location]);
 
   return (
-    <div className="auth-callback-container">
-      <div className="loading-spinner">Processing authentication...</div>
+    <div>
+      Processing authentication...
     </div>
   );
 };

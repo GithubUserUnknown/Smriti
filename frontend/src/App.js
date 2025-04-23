@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import FileUpload from './components/FileUpload';
 import SearchFiles from './components/SearchFiles';
@@ -18,7 +18,7 @@ function App() {
   useEffect(() => {
     const checkServerStatus = async () => {
       try {
-        const response = await fetch('React_Frontend_Url/api/health');
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/health`);
         if (!response.ok) {
           throw new Error('Server is not responding');
         }
@@ -80,9 +80,7 @@ function App() {
             <Route path="/register" element={<RegistrationPage />} />
             <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
             <Route path="/auth-callback" element={<AuthCallback />} />
-            <Route path="/auth/google/callback" element={<AuthCallback />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </main>
       </div>
@@ -91,8 +89,5 @@ function App() {
 }
 
 export default App;
-
-
-
 
 

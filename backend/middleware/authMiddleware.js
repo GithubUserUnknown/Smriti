@@ -11,15 +11,11 @@ const authMiddleware = async (req, res, next) => {
       token = authHeader.split(' ')[1];
     } else if (req.query.token) {
         token = decodeURIComponent(req.query.token).trim();
-    }
+      }
 
     if (!token) {
       return res.status(401).json({ message: 'Authorization token missing' });
     }
-
-    // Remove these debug logs
-    // console.log('Token from query/header:', token);
-    // console.log('Token preview:', token.slice(0, 20) + '...' );
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -63,15 +59,18 @@ const authMiddleware = async (req, res, next) => {
 
     next();
   } catch (error) {
-    // Only log non-sensitive error information
-    console.error('Auth middleware error:', error.name);
+    console.error('Auth middleware error:', error);
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ 
         message: 'Token expired',
+        error: error.message,
         type: 'TOKEN_EXPIRED'
       });
     }
-    return res.status(401).json({ message: 'Authentication failed' });
+    return res.status(401).json({ 
+      message: 'Authentication failed',
+      error: error.message
+    });
   }
 };
 

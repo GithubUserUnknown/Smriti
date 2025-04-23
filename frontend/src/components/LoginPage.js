@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/LoginPage.css'; // External CSS for styling
 
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
+});
+
 const LoginPage = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,7 +15,7 @@ const LoginPage = ({ onLogin }) => {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
+      const res = await api.post('/api/auth/login', {
         email,
         password,
       });
@@ -27,18 +31,7 @@ const LoginPage = ({ onLogin }) => {
   };
 
   const handleGoogleLogin = () => {
-    // Add error handling and loading state
-    try {
-      // Store the current URL for redirect after login
-      sessionStorage.setItem('redirectUrl', window.location.pathname);
-      
-      // Construct the Google auth URL using the backend URL
-      const googleAuthUrl = `${process.env.REACT_APP_API_URL}/auth/google`;
-      window.location.href = googleAuthUrl;
-    } catch (error) {
-      console.error('Google login error:', error);
-      setMessage('Failed to initiate Google login');
-    }
+    window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`;
   };
 
   return (
