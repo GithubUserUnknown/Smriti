@@ -5,6 +5,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL;
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
+  withCredentials: true, // Important for CORS with credentials
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -13,6 +14,10 @@ const api = axios.create({
 
 // Add a request interceptor
 api.interceptors.request.use((config) => {
+  // Add origin header for CORS
+  config.headers['Origin'] = window.location.origin;
+  
+  // Add authorization if token exists
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -54,6 +59,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-
-
-
