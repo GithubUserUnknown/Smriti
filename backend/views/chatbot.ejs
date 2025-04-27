@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="/css/chatbot.css">
+</head>
+<body>
+    <div id="chatbot-container">
+        <!-- Chatbot UI structure -->
+    </div>
+
+    <!-- Load libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/emoji-button@4/dist/index.min.js"></script>
+    
+    <!-- Load configuration -->
+    <script>
+        window.chatbotConfig = <%- JSON.stringify(config) %>;
+    </script>
+    
+    <!-- Load client-side logic -->
+    <script src="/js/chatbot.js"></script>
+</body>
+</html>

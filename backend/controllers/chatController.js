@@ -67,8 +67,8 @@ exports.handleChatRequest = async (req, res) => {
     const chatbotIntroduction = `Chatbot Name: ${name || 'Your AI Companion'}\n`;
 
     const prompt = companyDataUsed
-      ? `${chatbotIntroduction}${personalityStatement}${conversationContext ? `Conversation so far:\n${conversationContext}\n\n` : ''}Use the company data below to generate a response:\n${companyContext}\n\nUser: ${userQuery}`
-      : `${chatbotIntroduction}${personalityStatement}${conversationContext ? `Conversation so far:\n${conversationContext}\n\n` : ''}User: ${userQuery}`;
+      ? `${chatbotIntroduction}${personalityStatement}${conversationContext ? `Conversation so far:\n${conversationContext}\n\n` : ''}Use the company data below to generate a response:\n${companyContext}\n don't break the fouth wall or say anything that will feel out of context\nUser: ${userQuery}`
+      : `${chatbotIntroduction}${personalityStatement}${conversationContext ? `Conversation so far:\n${conversationContext}\n\n` : ''}don't break the fouth wall or say anything that will feel out of context\nUser: ${userQuery}`;
 
     // Send the prompt to Gemini API
     const response = await axios.post(

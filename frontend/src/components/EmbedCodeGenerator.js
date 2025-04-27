@@ -3,7 +3,7 @@ import '../styles/EmbedCodeGenerator.css';
 
 const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
   const [copied, setCopied] = useState(false);
-  const [embedSize, setEmbedSize] = useState({ width: 800, height: 600 });
+  const [embedSize, setEmbedSize] = useState({ width: 400, height: 600 });
   const [customization, setCustomization] = useState({
     theme: 'light',
     position: 'right',
@@ -78,10 +78,11 @@ const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
   const getPreviewContainerStyle = () => {
     const baseStyle = {
       backgroundColor: customization.theme === 'dark' ? '#1a1a1a' : '#ffffff',
-      padding: '20px',
+      padding: '0px',
       borderRadius: '16px',
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
       minHeight: '600px',
+      maxWidth: 'max-content',
       position: 'relative',
       transition: 'all 0.3s ease',
     };
@@ -128,7 +129,8 @@ const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
     customization.glassmorphism 
       ? '0 8px 32px rgba(31, 38, 135, 0.15)' 
       : '0 4px 12px rgba(0, 0, 0, 0.15)'
-  }; transition: all 0.3s ease;"
+  }; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 12px 32px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.12)';"
+  onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.08)';"
   allow="microphone; camera"
 ></iframe>`;
 
@@ -374,9 +376,11 @@ const EmbedCodeGenerator = ({ apiKey, token, personality }) => {
                   value={customization.position}
                   onChange={(e) => setCustomization({ ...customization, position: e.target.value })}
                 >
-                  <option value="right">Bottom Right</option>
-                  <option value="left">Bottom Left</option>
-                  <option value="center">Center</option>
+                  <option value="bottom-right">Bottom Right</option>
+                  <option value="bottom-left">Bottom Left</option>
+                  <option value="top-left">Top Left</option>
+                  <option value="top-right">Top Right</option>
+                                    
                 </select>
               </label>
             </div>
