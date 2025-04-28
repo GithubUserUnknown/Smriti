@@ -546,34 +546,89 @@ router.get('/', authMiddleware, async (req, res) => {
     const authToken = '${token}';
 
     // --- Voice Input using the Web Speech API ---
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  console.log("SpeechRecognition exists:", window.SpeechRecognition || window.webkitSpeechRecognition);
+  if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
     
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.lang = 'en-US';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-      const voiceButton = document.getElementById('voiceButton');
-      if(voiceButton) {
-        voiceButton.addEventListener('click', () => {
-          recognition.start();
-        });
-      }
-      recognition.addEventListener('result', (event) => {
-        const transcript = event.results[0][0].transcript;
-        document.getElementById('userInput').value = transcript;
-      });
-      recognition.addEventListener('error', (event) => {
-        console.error('Voice recognition error:', event.error);
-      });
-    } else {
-      const voiceButton = document.getElementById('voiceButton');
-      if(voiceButton) {
-        voiceButton.disabled = true;
-      }
-    }
-   
+    recognition.continuous = false;
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    
+    let timerInterval;
+    let elapsedTime = 0;
+
+    // Create voice button & timer elements
+    const voiceButton = document.getElementById('voiceButton');
+    const timerDisplay = document.createElement('span');
+    timerDisplay.id = 'recordingTimer';
+    timerDisplay.style.marginLeft = '10px';
+    timerDisplay.style.color = 'gray';
+
+    const stopButton = document.createElement('button');
+    stopButton.innerText = "⏹ Stop";
+    stopButton.style.display = "none"; // Hidden initially
+    document.getElementById('controls').appendChild(stopButton);
+
+    voiceButton.addEventListener('click', () => {
+      elapsedTime = 0;
+      timerDisplay.innerText = "00:00";
+      voiceButton.appendChild(timerDisplay); // Show timer
+
+      stopButton.style.display = "inline"; // Show stop button
+
+      recognition.start();
+      
+      timerInterval = setInterval(() => {
+        elapsedTime++;
+        const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+        const seconds = String(elapsedTime % 60).padStart(2, '0');
+        timerDisplay.innerText = minutes + ":" + seconds;
+      }, 1000);
+    });
+
+    recognition.addEventListener('start', () => {
+  console.log("Voice recording started...");
+});
+
+
+    // Stop recording manually
+    stopButton.addEventListener('click', () => {
+      recognition.stop();
+      clearInterval(timerInterval);
+      stopButton.style.display = "none"; // Hide stop button
+      timerDisplay.innerText = ""; // Reset timer display
+    });
+
+    recognition.addEventListener('result', (event) => {
+      const transcript = event.results[0][0].transcript;
+      console.log("Captured Speech:", transcript);
+      document.getElementById('userInput').value = transcript;
+
+      clearInterval(timerInterval);
+      stopButton.style.display = "none"; // Hide stop button
+      timerDisplay.innerText = ""; // Reset timer display
+
+      setTimeout(() => {
+    sendMessage(); // Auto-send after speech recognition
+  }, 500); // Short delay to allow UI update
+
+    });
+
+    recognition.addEventListener('error', (event) => {
+      console.error('Voice recognition error:', event.error);
+      clearInterval(timerInterval);
+      stopButton.style.display = "none"; // Hide stop button
+      timerDisplay.innerText = ""; // Reset timer display
+    });
+
+  } else {
+    voiceButton.disabled = true;
+    voiceButton.innerText = "Voice Not Supported";
+  }
+
 
     // --- Attachments: Trigger file dialog and display selected file name ---
     ${enableAttachments === 'true'
