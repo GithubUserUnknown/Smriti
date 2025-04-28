@@ -131,3 +131,4 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Time: ${new Date().toISOString()}`);
 });
 
+module.exports = app;
